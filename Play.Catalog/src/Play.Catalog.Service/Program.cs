@@ -20,11 +20,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddServiceDependancies(builder.Configuration);
 
-BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.BsonType.String));
-BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(MongoDB.Bson.BsonType.String));
-
-// builder.Services.
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

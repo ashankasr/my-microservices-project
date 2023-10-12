@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Bson.Serialization.Serializers;
 using Play.Catalog.Service.Entities;
 using Play.Catalog.Service.Interfaces;
 using Play.Catalog.Service.Repositories;
@@ -11,6 +12,9 @@ namespace Play.Catalog.Service
     {
         public static IServiceCollection AddServiceDependancies(this IServiceCollection services, IConfiguration configuration)
         {
+            MongoDB.Bson.Serialization.BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.BsonType.String));
+            MongoDB.Bson.Serialization.BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(MongoDB.Bson.BsonType.String));
+
             var serviceSettings = configuration.GetSection(nameof(ServiceSettings)).Get<ServiceSettings>();
             var mongoDbSettings = configuration.GetSection(nameof(MongoDbSettings)).Get<MongoDbSettings>();
 
