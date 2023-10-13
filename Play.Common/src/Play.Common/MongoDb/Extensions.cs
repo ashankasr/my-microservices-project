@@ -7,7 +7,7 @@ namespace Play.Common.MongoDb
 {
     public static class Extensions
     {
-        public static IServiceCollection AddMongoDb(this ServiceCollection services) 
+        public static IServiceCollection AddMongoDb(this IServiceCollection services) 
         {
             MongoDB.Bson.Serialization.BsonSerializer.RegisterSerializer(new GuidSerializer(MongoDB.Bson.BsonType.String));
             MongoDB.Bson.Serialization.BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(MongoDB.Bson.BsonType.String));
