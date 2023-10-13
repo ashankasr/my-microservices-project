@@ -27,3 +27,7 @@ Add Nugget source locations
 Run mongo container
 
 `docker run -d --rm --name mongo -p 27017:27017 -v mongodbdata:/data/db mongo`
+
+Run docker compose
+
+`docker-compose up`
