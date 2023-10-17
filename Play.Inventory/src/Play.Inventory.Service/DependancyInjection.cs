@@ -26,16 +26,33 @@ namespace Play.Inventory.Service
                 Client.BaseAddress = new Uri("https://localhost:5501");
             })
             .AddTransientHttpErrorPolicy(builder => builder.Or<TimeoutRejectedException>().WaitAndRetryAsync(
-                5,
+                5, // Number of attempts
                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt))
-                    + TimeSpan.FromMilliseconds(jitter.Next(0, 1000)),
+                    + TimeSpan.FromMilliseconds(jitter.Next(0, 1000)), // Time wait for the next attempt
                 onRetry: (outcome, timespan, retryAttempt) =>
                 {
-                    // avoid this code below. Test purpose only
+                    // On the retry
 
+                    // Avoid creating a logger like code below. Test purpose only
                     var serviceProvider = services.BuildServiceProvider();
                     serviceProvider.GetService<ILogger<CatalogClient>>()?
                     .LogWarning($"Delaying for {timespan.TotalSeconds} seconds, then making a retry {retryAttempt}");
+                }
+            ))
+            .AddTransientHttpErrorPolicy(builder => builder.Or<TimeoutRejectedException>().CircuitBreakerAsync(
+                3, // Number of failed request before opening the circuit
+                TimeSpan.FromSeconds(15),
+                onBreak: (outcome, timespan) =>
+                {
+                    var serviceProvider = services.BuildServiceProvider();
+                    serviceProvider.GetService<ILogger<CatalogClient>>()?
+                    .LogWarning($"Openning cirtcuit for {timespan.TotalSeconds} seconds...");
+                },
+                onReset: () =>
+                {
+                    var serviceProvider = services.BuildServiceProvider();
+                    serviceProvider.GetService<ILogger<CatalogClient>>()?
+                    .LogWarning($"Closing the cirtcuit...");
                 }
             ))
             .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(1));
