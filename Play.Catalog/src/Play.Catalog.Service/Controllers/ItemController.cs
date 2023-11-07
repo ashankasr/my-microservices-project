@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
+using Play.Catalog.Contracts;
 using Play.Catalog.Service.Dtos;
 using Play.Catalog.Service.Entities;
 using Play.Catalog.Service.Extensions;
@@ -15,37 +17,38 @@ namespace Play.Catalog.Service.Controllers
     public class ItemController : ControllerBase
     {
         private readonly IRepository<Item> itemsRepository;
+        private readonly IPublishEndpoint publishEndpoint;
+        // private static int requestCounter = 0;
 
-        private static int requestCounter = 0;
-
-        public ItemController(IRepository<Item> itemRepository)
+        public ItemController(IRepository<Item> itemRepository, IPublishEndpoint publishEndpoint)
         {
             this.itemsRepository = itemRepository;
+            this.publishEndpoint = publishEndpoint;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ItemDto>>> GetAsync()
         {
-            requestCounter++;
+            // requestCounter++;
 
-            Console.WriteLine($"Request {requestCounter}: Starting...");
+            // Console.WriteLine($"Request {requestCounter}: Starting...");
 
-            if (requestCounter <= 2)
-            {
-                Console.WriteLine($"Request {requestCounter}: Delaying...");
-                await Task.Delay(TimeSpan.FromSeconds(10));
-            }
-            
-            if (requestCounter <= 4)
-            {
-                Console.WriteLine($"Request {requestCounter}: 500 Internal Server Error...");
-                return StatusCode(500);
-            }
+            // if (requestCounter <= 2)
+            // {
+            //     Console.WriteLine($"Request {requestCounter}: Delaying...");
+            //     await Task.Delay(TimeSpan.FromSeconds(10));
+            // }
+
+            // if (requestCounter <= 4)
+            // {
+            //     Console.WriteLine($"Request {requestCounter}: 500 Internal Server Error...");
+            //     return StatusCode(500);
+            // }
 
             var items = (await itemsRepository.GetAllAsync())
             .Select(r => r.AsDto());
 
-            Console.WriteLine($"Request {requestCounter}: 200 (Ok)...");
+            // Console.WriteLine($"Request {requestCounter}: 200 (Ok)...");
 
             return Ok(items);
         }
@@ -78,6 +81,8 @@ namespace Play.Catalog.Service.Controllers
 
             await itemsRepository.CreateAsync(item);
 
+            await publishEndpoint.Publish(new CatalogItemCreated(item.Id, item.Name, item.Description, item.Price));
+
             return CreatedAtAction(nameof(GetAsync), new { id = item.Id }, item);
         }
 
@@ -98,6 +103,8 @@ namespace Play.Catalog.Service.Controllers
 
             await itemsRepository.UpdateAsync(item);
 
+            await publishEndpoint.Publish(new CatalogItemUpdated(item.Id, item.Name, item.Description, item.Price));
+
             return NoContent();
         }
 
@@ -112,6 +119,8 @@ namespace Play.Catalog.Service.Controllers
             }
 
             await itemsRepository.DeleteAsync(id);
+
+            await publishEndpoint.Publish(new CatalogItemDeleted(id));
 
             return NoContent();
         }
