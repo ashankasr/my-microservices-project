@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Play.Inventory.Service;
@@ -21,6 +22,13 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    app.UseCors(config =>
+    {
+        config.WithOrigins(builder.Configuration["AllowedOrigins"])
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
 }
 
 app.UseHttpsRedirection();
