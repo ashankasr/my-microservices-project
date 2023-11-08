@@ -3,7 +3,9 @@ using System.Net.Http;
 using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Play.Common.Entities;
 using Play.Common.Interfaces;
+using Play.Common.MassTransit;
 using Play.Common.MongoDb;
 using Play.Inventory.Service.Clients;
 using Play.Inventory.Service.Entities;
@@ -19,6 +21,36 @@ namespace Play.Inventory.Service
             services.AddRepositories();
             services.AddMongoDb();
 
+            // Synchronous microservice communication
+            // services.AddCatalogHttpClient();
+
+            // Asynchronous configuration
+            services.AddMassTrasitWithRabbitMQ();
+
+            return services;
+        }
+
+        private static IServiceCollection AddRepositories(this IServiceCollection services)
+        {
+            services.AddRepository<InventoryItem>("inventoryitems");
+            services.AddRepository<CatalogItem>("catalogitems");
+
+            return services;
+        }
+
+        private static IServiceCollection AddRepository<T>(this IServiceCollection services, string documentCollectionName) where T : BaseEntity
+        {
+            services.AddSingleton<IRepository<T>>(serviceProvider =>
+            {
+                var database = serviceProvider.GetService<MongoDB.Driver.IMongoDatabase>();
+                return new Repository<T>(database, documentCollectionName);
+            });
+
+            return services;
+        }
+
+        private static IServiceCollection AddCatalogHttpClient(this IServiceCollection services)
+        {
             Random jitter = new Random();
 
             services.AddHttpClient<CatalogClient>(Client =>
@@ -56,17 +88,6 @@ namespace Play.Inventory.Service
                 }
             ))
             .AddPolicyHandler(Policy.TimeoutAsync<HttpResponseMessage>(1));
-
-            return services;
-        }
-
-        private static IServiceCollection AddRepositories(this IServiceCollection services)
-        {
-            services.AddSingleton<IRepository<InventoryItem>>(serviceProvider =>
-            {
-                var database = serviceProvider.GetService<MongoDB.Driver.IMongoDatabase>();
-                return new Repository<InventoryItem>(database, "inventoryitem");
-            });
 
             return services;
         }
