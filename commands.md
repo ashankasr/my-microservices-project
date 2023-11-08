@@ -28,6 +28,13 @@ Add Nugget source locations
 
 `dotnet nuget add source C:\Projects\Microservices\dotnetacademy\my-microservices-project\packages`
 
+Dotnet code generator
+
+`dotnet tool install -g dotnet-aspnet-codegenerator --version 7.0.0`
+
+Dotnet code generator for identity
+`dotnet aspnet-codegenerator identity --files "Account.Register"`
+
 ## docker
 
 Run mongo container
