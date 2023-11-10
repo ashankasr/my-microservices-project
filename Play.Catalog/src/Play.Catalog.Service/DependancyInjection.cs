@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Play.Catalog.Service.Entities;
@@ -6,6 +7,7 @@ using Play.Common.Interfaces;
 using Play.Common.MassTransit;
 using Play.Common.MongoDb;
 using Play.Common.Settings;
+using Play.Common.Identity;
 
 namespace Play.Catalog.Service
 {
@@ -18,6 +20,8 @@ namespace Play.Catalog.Service
             services.AddRepositories();
             services.AddMongoDb();
             services.AddMassTrasitWithRabbitMQ();
+
+            services.AddAuth();
 
             return services;
         }
@@ -36,6 +40,20 @@ namespace Play.Catalog.Service
                 var database = serviceProvider.GetService<MongoDB.Driver.IMongoDatabase>();
                 return new Repository<T>(database, documentCollectionName);
             });
+
+            return services;
+        }
+
+        private static IServiceCollection AddAuth(this IServiceCollection services)
+        {
+            // services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            // .AddJwtBearer(options =>
+            // {
+            //     options.Authority = "https://localhost:5701";
+            //     options.Audience = serviceName;
+            // });
+
+            services.AddJwtBearerAuthentication(); // From Play.Common.Identity
 
             return services;
         }

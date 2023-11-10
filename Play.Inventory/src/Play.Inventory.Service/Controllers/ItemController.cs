@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Versioning;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Play.Common.Interfaces;
-using Play.Inventory.Service.Clients;
 using Play.Inventory.Service.Dtos;
 using Play.Inventory.Service.Entities;
 using Play.Inventory.Service.Extensions;
@@ -14,6 +13,7 @@ namespace Play.Inventory.Service.Controllers
 {
     [ApiController]
     [Route("items")]
+    [Authorize]
     public class ItemController : ControllerBase
     {
         private readonly IRepository<InventoryItem> itemsRepository;

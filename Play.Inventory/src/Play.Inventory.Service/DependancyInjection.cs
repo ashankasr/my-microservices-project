@@ -4,6 +4,7 @@ using Amazon.Runtime.Internal.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Play.Common.Entities;
+using Play.Common.Identity;
 using Play.Common.Interfaces;
 using Play.Common.MassTransit;
 using Play.Common.MongoDb;
@@ -27,6 +28,8 @@ namespace Play.Inventory.Service
             // Asynchronous configuration
             services.AddMassTrasitWithRabbitMQ();
 
+            services.AddAuth();
+
             return services;
         }
 
@@ -45,6 +48,13 @@ namespace Play.Inventory.Service
                 var database = serviceProvider.GetService<MongoDB.Driver.IMongoDatabase>();
                 return new Repository<T>(database, documentCollectionName);
             });
+
+            return services;
+        }
+
+        private static IServiceCollection AddAuth(this IServiceCollection services)
+        {
+            services.AddJwtBearerAuthentication(); // From Play.Common.Identity
 
             return services;
         }
