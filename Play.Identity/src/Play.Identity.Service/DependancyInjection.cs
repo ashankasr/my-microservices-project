@@ -7,6 +7,7 @@ using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using Play.Common.Settings;
 using Play.Identity.Service.Entities;
+using Play.Identity.Service.HostedServices;
 using Play.Identity.Service.Settings;
 
 namespace Play.Identity.Service
@@ -30,6 +31,8 @@ namespace Play.Identity.Service
                     serviceSettings.ServiceName
                 );
 
+            services.Configure<IdentitySettings>(configuration.GetSection(nameof(IdentitySettings)));
+
             services.AddIdentityServer(options =>
             {
                 options.Events.RaiseSuccessEvents = true;
@@ -44,6 +47,8 @@ namespace Play.Identity.Service
             .AddDeveloperSigningCredential();
 
             services.AddLocalApiAuthentication();
+
+            services.AddHostedService<IdentitySeedHostedService>();
 
             return services;
         }
