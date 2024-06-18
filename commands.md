@@ -20,9 +20,9 @@ Create Nuget package
 
 Create Nuget package with version
 
-`dotnet pack -p:PackageVersion=1.0.1 -o <output path>`
+`dotnet pack -p:PackageVersion=1.0.0 -o <output path>`
 
-`dotnet pack -p:PackageVersion=1.0.2 -o C:\Projects\Microservices\dotnetacademy\my-microservices-project\packages`
+`dotnet pack -p:PackageVersion=1.0.0 -o C:\Projects\Microservices\my-microservices-project\packages`
 
 Add Nugget source locations
 
