@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http;
 using Amazon.Runtime.Internal.Util;
+using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Play.Common.Entities;
@@ -10,6 +11,7 @@ using Play.Common.MassTransit;
 using Play.Common.MongoDb;
 using Play.Inventory.Service.Clients;
 using Play.Inventory.Service.Entities;
+using Play.Inventory.Service.Exceptions;
 using Polly;
 using Polly.Timeout;
 
@@ -26,7 +28,11 @@ namespace Play.Inventory.Service
             // services.AddCatalogHttpClient();
 
             // Asynchronous configuration
-            services.AddMassTrasitWithRabbitMQ();
+            services.AddMassTrasitWithRabbitMQ(retryConfigurator =>
+            {
+                retryConfigurator.Interval(3, TimeSpan.FromSeconds(5));
+                retryConfigurator.Ignore(typeof(UnknowItemException));
+            });
 
             services.AddAuth();
 
